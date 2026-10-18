@@ -4,9 +4,11 @@ package com.example.jaqui.navigation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.jaqui.ui.screens.FormularioScreen
 import com.example.jaqui.ui.screens.MenuScreen
 import com.example.jaqui.ui.screens.TarjetasScreen
 import com.example.jaqui.ui.screens.TraductorScreen
@@ -27,6 +29,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 },
                 onLoginClick = {
                     navController.navigate("login")
+                },
+                onRegistroClick = {
+                    navController.navigate("registro")
                 }
             )
         }
@@ -42,6 +47,20 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onMemoriaClick = {
                     navController.navigate("memoria")
             }
+            )
+        }
+
+        composable("registro") {
+            FormularioScreen(
+                viewModel = viewModel(),
+                onRegistroExitoso = {
+                    navController.navigate("menu") {
+                        popUpTo("inicio") { inclusive = true }
+                    }
+                },
+                onLoginClick = {
+                    navController.navigate("login")
+                }
             )
         }
 
