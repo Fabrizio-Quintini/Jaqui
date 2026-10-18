@@ -3,8 +3,10 @@ package com.example.jaqui.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,36 +20,44 @@ fun TraductorScreen(
     modifier: Modifier = Modifier,
     onInvitadoClick: () -> Unit = {},
     onLoginClick: () -> Unit = {}
-    ) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp,
-            Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally)
-    {
-        Text(
-            text = "Jaqui ",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold)
-        Text(
-            text = "Aprende turco jugando  "
-        )
-        Button(
-            modifier = Modifier.width(240.dp),
-            onClick = onInvitadoClick
+) {
+    Scaffold(
+        modifier = modifier
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(
+                12.dp,
+                Alignment.CenterVertically
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Jugar como invitado"
+                text = "Jaqui ",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold
             )
-        }
-        Button(
-            modifier = Modifier.width(240.dp),
-            onClick = onLoginClick
-        ) {
             Text(
-                text = "Iniciar sesión"
+                text = "Aprende turco jugando  "
             )
+            Button(
+                modifier = Modifier.width(240.dp),
+                onClick = onInvitadoClick
+            ) {
+                Text(
+                    text = "Jugar como invitado"
+                )
+            }
+            Button(
+                modifier = Modifier.width(240.dp),
+                onClick = onLoginClick
+            ) {
+                Text(
+                    text = "Iniciar sesión"
+                )
+            }
         }
     }
-
 }
