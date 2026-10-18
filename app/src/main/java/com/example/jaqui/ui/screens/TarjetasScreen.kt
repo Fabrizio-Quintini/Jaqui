@@ -4,9 +4,11 @@ package com.example.jaqui.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,12 +23,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+data class Palabra(
+    val imagen: String,
+    val turco: String,
+    val espanol: String
+)
+
+private val palabrasTransporte = listOf(
+    Palabra("🚗", "Araba", "Auto"),
+    Palabra("🚌", "Otobüs", "Autobús"),
+    Palabra("🚆", "Tren", "Tren"),
+    Palabra("✈️", "Uçak", "Avión"),
+    Palabra("🚲", "Bisiklet", "Bicicleta"),
+    Palabra("🚢", "Gemi", "Barco")
+)
+
 @Composable
 fun TarjetasScreen(modifier: Modifier = Modifier) {
 
     var mostrarEspanol by remember {
         mutableStateOf(false)
     }
+
+    var indiceActual by remember {
+        mutableStateOf(0)
+    }
+
+    val palabraActual = palabrasTransporte[indiceActual]
 
     Column(
         modifier = modifier
@@ -38,7 +61,6 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Vocabulario: transporte",
             style = MaterialTheme.typography.headlineSmall
@@ -56,14 +78,17 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
                 Text(
-                    text = "🚗",
+                    text = palabraActual.imagen,
                     fontSize = 64.sp
                 )
 
                 Text(
-                    text = if (mostrarEspanol) "Auto" else "Araba",
+                    text = if (mostrarEspanol) {
+                        palabraActual.espanol
+                    } else {
+                        palabraActual.turco
+                    },
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -77,5 +102,32 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
         Text(
             text = "Toca la tarjeta para ver la traducción"
         )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = {
+                    if (indiceActual > 0) {
+                        indiceActual--
+                        mostrarEspanol = false
+                    }
+                }
+            ) {
+                Text(text = "Anterior")
+            }
+
+            Button(
+                onClick = {
+                    if (indiceActual < palabrasTransporte.lastIndex) {
+                        indiceActual++
+                        mostrarEspanol = false
+                    }
+                }
+            ) {
+                Text(text = "Siguiente")
+            }
+        }
     }
 }
