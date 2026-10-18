@@ -14,7 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TraductorScreen(modifier: Modifier = Modifier) {
+fun TraductorScreen(
+    modifier: Modifier = Modifier,
+    onInvitadoClick: () -> Unit = {},
+    onLoginClick: () -> Unit = {}
+    ) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp,
@@ -30,7 +34,7 @@ fun TraductorScreen(modifier: Modifier = Modifier) {
         )
         Button(
             modifier = Modifier.width(240.dp),
-            onClick = { }
+            onClick = onInvitadoClick
         ) {
             Text(
                 text = "Jugar como invitado"
@@ -38,7 +42,7 @@ fun TraductorScreen(modifier: Modifier = Modifier) {
         }
         Button(
             modifier = Modifier.width(240.dp),
-            onClick = { }
+            onClick = onLoginClick
         ) {
             Text(
                 text = "Iniciar sesión"
