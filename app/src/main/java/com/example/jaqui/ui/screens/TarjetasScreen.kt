@@ -51,6 +51,7 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
 
     val palabraActual = palabrasTransporte[indiceActual]
 
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -61,6 +62,10 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "Tarjeta ${indiceActual + 1} de ${palabrasTransporte.size}",
+            style = MaterialTheme.typography.titleMedium
+        )
         Text(
             text = "Vocabulario: transporte",
             style = MaterialTheme.typography.headlineSmall
