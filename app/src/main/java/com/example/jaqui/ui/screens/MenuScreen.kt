@@ -50,7 +50,7 @@ fun MenuScreen(modifier: Modifier = Modifier,
         Button(
             onClick = onMemoriaClick
         ) {
-            Text(text = "Juego de memoria")
+            Text(text = "Memorice")
         }
     }
 }
