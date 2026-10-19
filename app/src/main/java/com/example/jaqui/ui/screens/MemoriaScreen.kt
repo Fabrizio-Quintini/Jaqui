@@ -1,5 +1,11 @@
 package com.example.jaqui.ui.screens
 
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,12 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jaqui.model.CartaMemoria
+import com.example.jaqui.model.Idioma
 import com.example.jaqui.viewmodel.MemoriaViewModel
+import java.util.Locale
 
 private const val COLUMNAS = 5
 private const val FILAS = 4
@@ -49,6 +59,77 @@ fun MemoriaScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var segundosTranscurridos by remember { mutableStateOf(0L) }
+
+    // Text to Speech
+    val contexto = LocalContext.current
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    var ttsListo by remember { mutableStateOf(false) }
+
+    // Se crea una sola vez y se libera al salir de la pantalla.
+    DisposableEffect(Unit) {
+        val motor = TextToSpeech(contexto) { estadoInit ->
+            ttsListo = estadoInit == TextToSpeech.SUCCESS
+        }
+        tts = motor
+        onDispose {
+            motor.stop()
+            motor.shutdown() // liberar el motor de voz
+            tts = null
+            ttsListo = false
+        }
+    }
+
+    fun decirPalabra(texto: String, idioma: Idioma) {
+        val motor = tts ?: return
+        if (!ttsListo) return
+
+        val locale = if (idioma == Idioma.TURCO) {
+            Locale.forLanguageTag("tr")
+        } else {
+            Locale.forLanguageTag("es")
+        }
+        val disponible = motor.isLanguageAvailable(locale)
+        motor.language = if (disponible >= TextToSpeech.LANG_AVAILABLE) {
+            locale
+        } else {
+            Locale.forLanguageTag("es")
+        }
+        //si tocan rápido otra carta, corta el audio anterior
+        motor.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "carta")
+    }
+
+    // Vibración
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val manager =
+            contexto.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        manager.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        contexto.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+
+    fun vibrar(patron: LongArray) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(patron, -1))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(patron, -1)
+        }
+    }
+
+    // Acierto: un pulso corto y fuerte.
+    LaunchedEffect(estado.aciertos) {
+        if (estado.aciertos > 0) {
+            vibrar(longArrayOf(0, 120))
+        }
+    }
+
+    // Intento fallido: doble pulso más suave.
+    LaunchedEffect(estado.bloqueado) {
+        if (estado.bloqueado) {
+            vibrar(longArrayOf(0, 80, 80, 80))
+        }
+    }
 
     // Temporizador en vivo; se detiene al terminar la partida.
     LaunchedEffect(estado.inicioMillis, estado.terminado) {
@@ -169,7 +250,12 @@ fun MemoriaScreen(
                                     CartaMemoriaItem(
                                         carta = carta,
                                         modifier = Modifier.size(anchoCarta, altoCarta),
-                                        onClick = { viewModel.onCartaClick(carta.id) }
+                                        onClick = {
+                                            if (!carta.revelada) {
+                                                decirPalabra(carta.texto, carta.idioma)
+                                            }
+                                            viewModel.onCartaClick(carta.id)
+                                        }
                                     )
                                 }
                             }
