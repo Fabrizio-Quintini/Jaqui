@@ -1,4 +1,4 @@
-package com.example.jaqui.model
+    package com.example.jaqui.model
 
 data class ParVocabulario(
     val turco: String,

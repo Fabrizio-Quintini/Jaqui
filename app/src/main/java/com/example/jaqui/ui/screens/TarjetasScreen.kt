@@ -1,6 +1,6 @@
-
 package com.example.jaqui.ui.screens
 
+import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,44 +13,68 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class Palabra(
-    val imagen: String,
-    val turco: String,
-    val espanol: String
-)
-
-private val palabrasTransporte = listOf(
-    Palabra("🚗", "Araba", "Auto"),
-    Palabra("🚌", "Otobüs", "Autobús"),
-    Palabra("🚆", "Tren", "Tren"),
-    Palabra("✈️", "Uçak", "Avión"),
-    Palabra("🚲", "Bisiklet", "Bicicleta"),
-    Palabra("🚢", "Gemi", "Barco")
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jaqui.viewmodel.TarjetasViewModel
+import java.util.Locale
 
 @Composable
-fun TarjetasScreen(modifier: Modifier = Modifier) {
+fun TarjetasScreen(
+    modifier: Modifier = Modifier,
+    viewModel: TarjetasViewModel = viewModel()
+) {
+    val estado by viewModel.estado.collectAsState()
+    val palabraActual = viewModel.palabras[estado.indiceActual]
+    val context = LocalContext.current
 
-    var mostrarEspanol by remember {
+    var motorTts by remember {
+        mutableStateOf<TextToSpeech?>(null)
+    }
+
+    var ttsListo by remember {
         mutableStateOf(false)
     }
 
-    var indiceActual by remember {
-        mutableStateOf(0)
+    DisposableEffect(context) {
+        val motor = TextToSpeech(context) { resultado ->
+            ttsListo = resultado == TextToSpeech.SUCCESS
+        }
+
+        motorTts = motor
+
+        onDispose {
+            motor.stop()
+            motor.shutdown()
+            motorTts = null
+            ttsListo = false
+        }
     }
 
-    val palabraActual = palabrasTransporte[indiceActual]
+    fun reproducir(texto: String, idioma: Locale) {
+        val motor = motorTts
 
+        if (ttsListo && motor != null) {
+            motor.setLanguage(idioma)
+
+            motor.speak(
+                texto,
+                TextToSpeech.QUEUE_FLUSH,
+                null,
+                "jaqui-$texto"
+            )
+        }
+    }
 
     Column(
         modifier = modifier
@@ -63,9 +87,10 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Tarjeta ${indiceActual + 1} de ${palabrasTransporte.size}",
+            text = "Tarjeta ${estado.indiceActual + 1} de ${viewModel.palabras.size}",
             style = MaterialTheme.typography.titleMedium
         )
+
         Text(
             text = "Vocabulario: transporte",
             style = MaterialTheme.typography.headlineSmall
@@ -75,7 +100,7 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    mostrarEspanol = !mostrarEspanol
+                    viewModel.voltearTarjeta()
                 }
         ) {
             Column(
@@ -89,7 +114,7 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
                 )
 
                 Text(
-                    text = if (mostrarEspanol) {
+                    text = if (estado.mostrarEspanol) {
                         palabraActual.espanol
                     } else {
                         palabraActual.turco
@@ -99,39 +124,55 @@ fun TarjetasScreen(modifier: Modifier = Modifier) {
                 )
 
                 Text(
-                    text = if (mostrarEspanol) "Español" else "Turco"
+                    text = if (estado.mostrarEspanol) {
+                        "Español"
+                    } else {
+                        "Turco"
+                    }
                 )
             }
         }
 
-        Text(
-            text = "Toca la tarjeta para ver la traducción"
-        )
+        Text(text = "Toca la tarjeta para ver la traducción")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = {
+                    reproducir(palabraActual.turco, Locale("tr", "TR"))
+                },
+                enabled = ttsListo
+            ) {
+                Text("🔊 Turco")
+            }
+
+            Button(
+                onClick = {
+                    reproducir(palabraActual.espanol, Locale("es", "CL"))
+                },
+                enabled = ttsListo
+            ) {
+                Text("🔊 Español")
+            }
+        }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = {
-                    if (indiceActual > 0) {
-                        indiceActual--
-                        mostrarEspanol = false
-                    }
-                }
+                onClick = { viewModel.anterior() },
+                enabled = estado.indiceActual > 0
             ) {
-                Text(text = "Anterior")
+                Text("Anterior")
             }
 
             Button(
-                onClick = {
-                    if (indiceActual < palabrasTransporte.lastIndex) {
-                        indiceActual++
-                        mostrarEspanol = false
-                    }
-                }
+                onClick = { viewModel.siguiente() },
+                enabled = estado.indiceActual < viewModel.palabras.lastIndex
             ) {
-                Text(text = "Siguiente")
+                Text("Siguiente")
             }
         }
     }
