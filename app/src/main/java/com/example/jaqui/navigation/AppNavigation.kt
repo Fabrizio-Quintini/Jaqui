@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.jaqui.ui.screens.FormularioScreen
+import com.example.jaqui.ui.screens.MemoriaScreen
 import com.example.jaqui.ui.screens.MenuScreen
 import com.example.jaqui.ui.screens.TarjetasScreen
 import com.example.jaqui.ui.screens.TraductorScreen
@@ -76,7 +77,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
 
         composable("memoria") {
-            Text(text = "Juego de memoria")
+            MemoriaScreen(
+                viewModel = viewModel(),
+                onVolver = { navController.popBackStack() }
+            )
         }
     }
 }
