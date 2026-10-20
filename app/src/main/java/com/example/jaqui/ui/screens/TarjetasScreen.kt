@@ -1,6 +1,8 @@
 package com.example.jaqui.ui.screens
 
 import android.speech.tts.TextToSpeech
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,12 @@ fun TarjetasScreen(
     val estado by viewModel.estado.collectAsState()
     val palabraActual = viewModel.palabras[estado.indiceActual]
     val context = LocalContext.current
+
+    val rotacionTarjeta by animateFloatAsState(
+        targetValue = if (estado.mostrarEspanol) 180f else 0f,
+        animationSpec = tween(durationMillis = 600),
+        label = "rotacionTarjeta"
+    )
 
     var motorTts by remember {
         mutableStateOf<TextToSpeech?>(null)
@@ -99,14 +108,20 @@ fun TarjetasScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .graphicsLayer {
+                    rotationY = rotacionTarjeta
+                    cameraDistance = 12 * density
+                }
                 .clickable {
                     viewModel.voltearTarjeta()
                 }
         ) {
             Column(
-                modifier = Modifier.padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier
+                    .padding(32.dp)
+                    .graphicsLayer {
+                        rotationY = if(estado.mostrarEspanol) 180f else 0f
+                    },
             ) {
                 Text(
                     text = palabraActual.imagen,
