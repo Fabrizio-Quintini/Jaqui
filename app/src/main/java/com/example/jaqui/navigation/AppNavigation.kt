@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.jaqui.ui.screens.FormularioScreen
+import com.example.jaqui.ui.screens.LoginScreen
 import com.example.jaqui.ui.screens.MemoriaScreen
 import com.example.jaqui.ui.screens.MenuScreen
 import com.example.jaqui.ui.screens.TarjetasScreen
@@ -66,7 +67,17 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
 
         composable("login") {
-            Text(text = "Inicio de sesión: próximamente")
+            LoginScreen(
+                viewModel = viewModel(),
+                onLoginExitoso = {
+                    navController.navigate("menu") {
+                        popUpTo("inicio") { inclusive = true }
+                    }
+                },
+                onRegistroClick = {
+                    navController.navigate("registro")
+                }
+            )
         }
         composable("tarjetas") {
             TarjetasScreen()

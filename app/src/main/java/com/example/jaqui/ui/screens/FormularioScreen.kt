@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.jaqui.viewmodel.FormularioViewModel
@@ -65,6 +68,32 @@ fun FormularioScreen(
                 supportingText = estado.errores.correo?.let { { Text(it) } }
             )
             Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = estado.password,
+                onValueChange = { viewModel.onPasswordChange(it) },
+                label = { Text("Contraseña") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+                isError = estado.errores.password != null,
+                supportingText = estado.errores.password?.let { { Text(it) } }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = estado.confirmarPassword,
+                onValueChange = { viewModel.onConfirmarPasswordChange(it) },
+                label = { Text("Confirmar contraseña") },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+                isError = estado.errores.confirmarPassword != null,
+                supportingText = estado.errores.confirmarPassword?.let { { Text(it) } }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -88,7 +117,7 @@ fun FormularioScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    if (viewModel.validarFormulario()) {
+                    viewModel.registrar {
                         onRegistroExitoso()
                     }
                 },
