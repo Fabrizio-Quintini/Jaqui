@@ -12,6 +12,7 @@ import com.example.jaqui.ui.screens.FormularioScreen
 import com.example.jaqui.ui.screens.LoginScreen
 import com.example.jaqui.ui.screens.MemoriaScreen
 import com.example.jaqui.ui.screens.MenuScreen
+import com.example.jaqui.ui.screens.QuizScreen
 import com.example.jaqui.ui.screens.TarjetasScreen
 import com.example.jaqui.ui.screens.TraductorScreen
 
@@ -84,7 +85,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
 
         composable("quiz") {
-            Text(text = "Cuestionario")
+            QuizScreen()
         }
 
         composable("memoria") {
